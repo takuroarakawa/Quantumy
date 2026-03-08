@@ -96,15 +96,45 @@ const pages: MangaPage[] = [
 
 export function DoctorCanvasPrototype() {
   const [pageIndex, setPageIndex] = useState(0);
+  const [isMobileCitationOpen, setIsMobileCitationOpen] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const currentPage = pages[pageIndex];
+
+  const goNextPage = () => {
+    setPageIndex((prev) => Math.min(prev + 1, pages.length - 1));
+  };
+
+  const goPrevPage = () => {
+    setPageIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const jumpToPage = (index: number) => {
+    setPageIndex(index);
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isInputLike =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.getAttribute("contenteditable") === "true";
+
+      if (isInputLike) {
+        return;
+      }
+
       if (event.key === "ArrowRight") {
-        setPageIndex((prev) => Math.min(prev + 1, pages.length - 1));
+        goNextPage();
       }
       if (event.key === "ArrowLeft") {
-        setPageIndex((prev) => Math.max(prev - 1, 0));
+        goPrevPage();
+      }
+      if (event.key.toLowerCase() === "c") {
+        setIsMobileCitationOpen((prev) => !prev);
+      }
+      if (event.key === "Escape") {
+        setIsMobileCitationOpen(false);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -126,13 +156,15 @@ export function DoctorCanvasPrototype() {
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Doctor Canvas</p>
             <h1 className="text-lg font-semibold sm:text-xl">漫画版岩波文庫 / Quantumy Phase 1</h1>
           </div>
-          <p className="hidden rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300 sm:block">
-            ← → キーでページ移動
-          </p>
+          <div className="hidden items-center gap-2 sm:flex">
+            <p className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+              ← → で移動 / Cで引用
+            </p>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-[1440px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <main className="mx-auto grid w-full max-w-[1440px] gap-6 px-4 py-6 pb-28 sm:px-6 sm:pb-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-4">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -145,18 +177,62 @@ export function DoctorCanvasPrototype() {
               </span>
             </div>
 
-            <div className="relative mx-auto flex max-w-[780px] items-center justify-center">
+            <div className="mb-3 flex items-center justify-between gap-2 sm:hidden">
+              <button
+                type="button"
+                onClick={goPrevPage}
+                disabled={pageIndex === 0}
+                className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 disabled:opacity-40"
+              >
+                前へ
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsMobileCitationOpen(true)}
+                className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100"
+              >
+                出典を見る
+              </button>
+              <button
+                type="button"
+                onClick={goNextPage}
+                disabled={pageIndex === pages.length - 1}
+                className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 disabled:opacity-40"
+              >
+                次へ
+              </button>
+            </div>
+
+            <div
+              className="relative mx-auto flex max-w-[780px] items-center justify-center"
+              onTouchStart={(event) => setTouchStartX(event.changedTouches[0]?.clientX ?? null)}
+              onTouchEnd={(event) => {
+                if (touchStartX === null) return;
+                const endX = event.changedTouches[0]?.clientX ?? touchStartX;
+                const deltaX = endX - touchStartX;
+                const swipeThreshold = 42;
+                if (deltaX < -swipeThreshold) {
+                  goNextPage();
+                } else if (deltaX > swipeThreshold) {
+                  goPrevPage();
+                }
+                setTouchStartX(null);
+              }}
+            >
               <button
                 type="button"
                 aria-label="前のページ"
-                onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
+                onClick={goPrevPage}
                 disabled={pageIndex === 0}
-                className="absolute left-0 z-10 hidden h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-sm text-slate-200 transition hover:border-cyan-400/70 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-40 md:flex"
+                className="absolute left-0 z-10 hidden h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-sm text-slate-200 transition hover:border-cyan-400/70 hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 disabled:cursor-not-allowed disabled:opacity-40 md:flex"
               >
                 ←
               </button>
 
-              <article className="aspect-[2/3] w-full rounded-2xl border border-slate-700 bg-gradient-to-br from-zinc-100 to-zinc-300 p-4 text-zinc-900 shadow-[0_30px_90px_-35px_rgba(34,211,238,0.55)] sm:p-5">
+              <article
+                aria-live="polite"
+                className="aspect-[2/3] w-full rounded-2xl border border-slate-700 bg-gradient-to-br from-zinc-100 to-zinc-300 p-4 text-zinc-900 shadow-[0_30px_90px_-35px_rgba(34,211,238,0.55)] sm:p-5"
+              >
                 <div className="grid h-full grid-cols-2 gap-3">
                   <div className="rounded-xl border-2 border-zinc-900 bg-white p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
@@ -191,9 +267,9 @@ export function DoctorCanvasPrototype() {
               <button
                 type="button"
                 aria-label="次のページ"
-                onClick={() => setPageIndex((prev) => Math.min(prev + 1, pages.length - 1))}
+                onClick={goNextPage}
                 disabled={pageIndex === pages.length - 1}
-                className="absolute right-0 z-10 hidden h-10 w-10 translate-x-1/2 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-sm text-slate-200 transition hover:border-cyan-400/70 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-40 md:flex"
+                className="absolute right-0 z-10 hidden h-10 w-10 translate-x-1/2 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-sm text-slate-200 transition hover:border-cyan-400/70 hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 disabled:cursor-not-allowed disabled:opacity-40 md:flex"
               >
                 →
               </button>
@@ -206,8 +282,11 @@ export function DoctorCanvasPrototype() {
                 </span>
                 <span>{Math.round(progress)}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-                <div className="h-full rounded-full bg-cyan-400 transition-all duration-300" style={{ width: `${progress}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-slate-800" role="progressbar" aria-valuemin={1} aria-valuemax={pages.length} aria-valuenow={pageIndex + 1}>
+                <div
+                  className="h-full rounded-full bg-cyan-400 transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </div>
           </div>
@@ -219,12 +298,13 @@ export function DoctorCanvasPrototype() {
                 <button
                   key={page.id}
                   type="button"
-                  onClick={() => setPageIndex(index)}
+                  onClick={() => jumpToPage(index)}
                   className={`rounded-xl border p-3 text-left transition ${
                     index === pageIndex
                       ? "border-cyan-300 bg-cyan-500/10 text-cyan-100"
                       : "border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500"
                   }`}
+                  aria-current={index === pageIndex ? "page" : undefined}
                 >
                   <p className="text-xs text-slate-400">Page {index + 1}</p>
                   <p className="mt-1 text-sm font-semibold">{page.sceneTitle}</p>
@@ -234,7 +314,7 @@ export function DoctorCanvasPrototype() {
           </div>
         </section>
 
-        <aside className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 lg:sticky lg:top-20 lg:h-fit">
+        <aside className="hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4 lg:sticky lg:top-20 lg:block lg:h-fit">
           <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Citation Sidebar</p>
           <h2 className="mt-2 text-lg font-semibold">出典 / 論文リファレンス</h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">
@@ -253,7 +333,7 @@ export function DoctorCanvasPrototype() {
                 <a
                   href={`https://doi.org/${citation.doi}`}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="mt-3 inline-flex rounded-md border border-cyan-400/40 px-2.5 py-1.5 text-xs text-cyan-200 transition hover:border-cyan-200 hover:text-cyan-100"
                 >
                   DOI: {citation.doi}
@@ -263,6 +343,73 @@ export function DoctorCanvasPrototype() {
           </div>
         </aside>
       </main>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 p-3 backdrop-blur lg:hidden">
+        <div className="mx-auto flex w-full max-w-[720px] items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={goPrevPage}
+            disabled={pageIndex === 0}
+            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 disabled:opacity-40"
+          >
+            ← 前ページ
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsMobileCitationOpen(true)}
+            className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-100"
+          >
+            引用を開く
+          </button>
+          <button
+            type="button"
+            onClick={goNextPage}
+            disabled={pageIndex === pages.length - 1}
+            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 disabled:opacity-40"
+          >
+            次ページ →
+          </button>
+        </div>
+      </div>
+
+      {isMobileCitationOpen ? (
+        <div className="fixed inset-0 z-40 flex items-end bg-slate-950/70 p-3 lg:hidden" role="dialog" aria-modal="true" aria-label="引用一覧">
+          <div className="max-h-[82vh] w-full overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">出典 / 論文リファレンス</h2>
+              <button
+                type="button"
+                onClick={() => setIsMobileCitationOpen(false)}
+                className="rounded-md border border-slate-600 px-2.5 py-1 text-xs text-slate-200"
+              >
+                閉じる
+              </button>
+            </div>
+            <p className="text-xs leading-6 text-slate-300">
+              Page {pageIndex + 1} に関連する論文です。漫画を読みながら根拠へ即アクセスできます。
+            </p>
+            <div className="mt-3 space-y-3">
+              {relatedCitations.map((citation) => (
+                <article key={citation.id} className="rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+                  <h3 className="text-sm font-semibold leading-6 text-slate-100">{citation.title}</h3>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {citation.authors} ({citation.year})
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-slate-300">{citation.summary}</p>
+                  <a
+                    href={`https://doi.org/${citation.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex rounded-md border border-cyan-400/40 px-2.5 py-1.5 text-xs text-cyan-200"
+                  >
+                    DOI: {citation.doi}
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
