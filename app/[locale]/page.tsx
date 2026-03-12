@@ -32,6 +32,11 @@ export default async function LocaleHome({ params }: LocaleHomeProps) {
           <Link href={`/${locale}/logs`}>→</Link>
         </article>
         <article className="card">
+          <h3>{t.home.cards.ideasTitle}</h3>
+          <p className="muted">{t.home.cards.ideasBody}</p>
+          <Link href={`/${locale}/ideas`}>→</Link>
+        </article>
+        <article className="card">
           <h3>{t.home.cards.roadmapTitle}</h3>
           <p className="muted">{t.home.cards.roadmapBody}</p>
         </article>

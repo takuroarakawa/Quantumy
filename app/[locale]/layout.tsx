@@ -24,6 +24,7 @@ export default async function LocaleLayout({
         <Link href={`/${locale}`}>{t.nav.home}</Link>
         <Link href={`/${locale}/meeting-pack`}>{t.nav.meetingPack}</Link>
         <Link href={`/${locale}/logs`}>{t.nav.logs}</Link>
+        <Link href={`/${locale}/ideas`}>{t.nav.ideas}</Link>
         <div className="nav-right">
           {locales.map((nextLocale) => (
             <Link

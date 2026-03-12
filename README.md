@@ -16,6 +16,8 @@ npm run dev
 
 - `docs/meeting-pack`  
   岡山支店面談向けのA4資料5枚
+- `docs/logs`  
+  相談ログや自動生成された日次開発ログ
 - `docs/site-plan`  
   自社ナレッジサイト化の中期計画
 - `app`  
@@ -26,3 +28,11 @@ npm run dev
 ## 面談当日資料
 
 `docs/meeting-pack/README.md` を参照し、5枚を印刷して持参してください。
+
+## 日次アイデア入力 → 自動ログ化
+
+- 画面: `/ja/ideas` または `/en/ideas`
+- API: `POST /api/ideas`
+- 保存先:
+  - 構造化データ: `data/dev-logs.json`
+  - Markdownログ: `docs/logs/*.md`
