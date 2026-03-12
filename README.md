@@ -1,11 +1,38 @@
-<div align="center">
+# Dr.CANVAS Workspace
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Dr.CANVASの融資準備資料と、今後の開発・法務・意思決定を蓄積する多言語Knowledge Hub（MVP）です。
 
-  <h1>Built with AI Studio</h2>
+## セットアップ
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+```bash
+npm install
+npm run dev
+```
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- 日本語トップ: `http://localhost:3000/ja`
+- 英語トップ: `http://localhost:3000/en`
 
-</div>
+## 主要ディレクトリ
+
+- `docs/meeting-pack`  
+  岡山支店面談向けのA4資料5枚
+- `docs/logs`  
+  相談ログや自動生成された日次開発ログ
+- `docs/site-plan`  
+  自社ナレッジサイト化の中期計画
+- `app`  
+  Next.js App Router（多言語MVP）
+- `lib`  
+  i18n辞書と初期コンテンツ
+
+## 面談当日資料
+
+`docs/meeting-pack/README.md` を参照し、5枚を印刷して持参してください。
+
+## 日次アイデア入力 → 自動ログ化
+
+- 画面: `/ja/ideas` または `/en/ideas`
+- API: `POST /api/ideas`
+- 保存先:
+  - 構造化データ: `data/dev-logs.json`
+  - Markdownログ: `docs/logs/*.md`
