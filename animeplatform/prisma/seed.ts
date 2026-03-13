@@ -14,6 +14,7 @@ const seriesData = [
     bannerImage: "https://picsum.photos/seed/anime1banner/1200/400",
     status: "completed",
     viewCount: 15420,
+    episodeCount: 5,
   },
   {
     title: "夏の終わりに咲く花",
@@ -26,6 +27,7 @@ const seriesData = [
     bannerImage: "https://picsum.photos/seed/anime2banner/1200/400",
     status: "completed",
     viewCount: 28750,
+    episodeCount: 3,
   },
   {
     title: "NEON UNDERGROUND",
@@ -38,30 +40,33 @@ const seriesData = [
     bannerImage: "https://picsum.photos/seed/anime3banner/1200/400",
     status: "ongoing",
     viewCount: 42100,
+    episodeCount: 8,
   },
   {
     title: "おばあちゃんの魔法レシピ",
     titleEn: "Grandma's Magic Recipe",
     description:
-      "料理上手な魔女のおばあちゃんが一品の料理を作るたびに繰り広げる短編アンソロジー。1話完結×無制限配信。子供から大人まで楽しめる温かい世界観。",
+      "料理上手な魔女のおばあちゃんが一品の料理を作るたびに繰り広げる短編アンソロジー。1話完結×無制限配信。",
     genre: "ファンタジー",
     tags: JSON.stringify(["料理", "魔女", "アンソロジー", "ほのぼの", "家族向け"]),
     coverImage: "https://picsum.photos/seed/anime4/400/600",
     bannerImage: "https://picsum.photos/seed/anime4banner/1200/400",
     status: "ongoing",
     viewCount: 67890,
+    episodeCount: 12,
   },
   {
     title: "深海のモノローグ",
     titleEn: "Monologue of the Deep Sea",
     description:
-      "深海調査員の孤独な独白アニメ。7話構成。セリフなし・BGMなしで映像と音響のみで語る実験的作品。従来の放送では実現不可能なフォーマット。",
+      "深海調査員の孤独な独白アニメ。7話構成。セリフなし・BGMなしで映像と音響のみで語る実験的作品。",
     genre: "ドラマ",
     tags: JSON.stringify(["実験的", "深海", "孤独", "無音", "アート"]),
     coverImage: "https://picsum.photos/seed/anime5/400/600",
     bannerImage: "https://picsum.photos/seed/anime5banner/1200/400",
     status: "completed",
     viewCount: 9340,
+    episodeCount: 7,
   },
   {
     title: "魔王の引退生活",
@@ -74,6 +79,7 @@ const seriesData = [
     bannerImage: "https://picsum.photos/seed/anime6banner/1200/400",
     status: "ongoing",
     viewCount: 89200,
+    episodeCount: 6,
   },
 ];
 
@@ -105,7 +111,7 @@ async function main() {
   const creators = [creator, creator2, creator, creator2, creator, creator2];
 
   for (let i = 0; i < seriesData.length; i++) {
-    const data = seriesData[i];
+    const { episodeCount, ...data } = seriesData[i];
     const author = creators[i];
 
     const series = await prisma.series.upsert({
@@ -119,7 +125,6 @@ async function main() {
       },
     });
 
-    const episodeCount = [5, 3, 8, 12, 7, 6][i];
     for (let ep = 1; ep <= episodeCount; ep++) {
       await prisma.episode.upsert({
         where: { id: `seed-ep-${i + 1}-${ep}` },
@@ -127,10 +132,9 @@ async function main() {
         create: {
           id: `seed-ep-${i + 1}-${ep}`,
           title: `第${ep}話`,
-          description: `${data.title} - 第${ep}話のエピソード`,
+          description: `${data.title} — 第${ep}話`,
           episodeNumber: ep,
           duration: Math.floor(Math.random() * 1200) + 300,
-          videoUrl: `https://example.com/video/${series.id}/ep${ep}`,
           thumbnailUrl: `https://picsum.photos/seed/${series.id}ep${ep}/640/360`,
           isPublished: true,
           isFree: ep === 1,
@@ -142,7 +146,7 @@ async function main() {
     }
   }
 
-  console.log("✅ シードデータの投入完了");
+  console.log("✅ シードデータ投入完了");
 }
 
 main()

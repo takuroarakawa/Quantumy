@@ -91,14 +91,14 @@ export function Navbar() {
                         <p className="text-sm font-medium">{session.user?.name}</p>
                         <p className="text-xs text-[#6b7280]">{session.user?.email}</p>
                       </div>
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-[#2a2a3e] transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <User className="w-4 h-4" />
-                        プロフィール
-                      </Link>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-[#2a2a3e] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="w-4 h-4" />
+                ダッシュボード
+              </Link>
                       <button
                         onClick={() => signOut()}
                         className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-[#2a2a3e] transition-colors"

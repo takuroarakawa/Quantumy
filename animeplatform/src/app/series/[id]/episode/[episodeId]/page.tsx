@@ -2,8 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { ChevronLeft, ChevronRight, Play, MessageCircle, Heart, Share2, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, MessageCircle, Share2, Eye } from "lucide-react";
 import { formatViewCount, formatDuration, formatRelativeTime } from "@/lib/utils";
+import { VideoPlayerWrapper } from "@/components/player/VideoPlayerWrapper";
+import { TipButton } from "@/components/monetize/TipButton";
+import { SubscribeButton } from "@/components/monetize/SubscribeButton";
 
 async function getEpisode(episodeId: string) {
   return prisma.episode.findUnique({
@@ -45,9 +48,11 @@ export default async function EpisodePlayerPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* ブレッドクラム */}
         <nav className="flex items-center gap-2 text-sm text-[#6b7280] mb-4">
-          <Link href="/" className="hover:text-[#e8e8f0]">ホーム</Link>
+          <Link href="/" className="hover:text-[#e8e8f0] transition-colors">ホーム</Link>
           <span>/</span>
-          <Link href={`/series/${series.id}`} className="hover:text-[#e8e8f0]">{series.title}</Link>
+          <Link href={`/series/${series.id}`} className="hover:text-[#e8e8f0] transition-colors">
+            {series.title}
+          </Link>
           <span>/</span>
           <span className="text-[#e8e8f0]">第{episode.episodeNumber}話</span>
         </nav>
@@ -56,49 +61,41 @@ export default async function EpisodePlayerPage({
           {/* メインプレイヤー */}
           <div className="lg:col-span-2 space-y-4">
             {/* ビデオプレイヤー */}
-            <div className="relative aspect-video bg-[#12121a] rounded-2xl overflow-hidden border border-[#2a2a3e]">
-              {episode.thumbnailUrl && (
-                <Image
-                  src={episode.thumbnailUrl}
-                  alt={episode.title}
-                  fill
-                  className="object-cover"
-                />
-              )}
-              <div className="absolute inset-0 bg-[#0a0a0f]/60 flex flex-col items-center justify-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-white/30 flex items-center justify-center backdrop-blur-sm hover:bg-white/20 transition-all cursor-pointer group">
-                  <Play className="w-8 h-8 text-white fill-white ml-1 group-hover:scale-110 transition-transform" />
-                </div>
-                <p className="text-white/70 text-sm">
-                  ※ デモ環境 — 実際の動画URLを設定すると再生されます
-                </p>
-              </div>
-
-              {/* コントロールバー */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0a0a0f] to-transparent p-4">
-                <div className="w-full h-1 bg-[#2a2a3e] rounded-full mb-3">
-                  <div className="h-full w-0 bg-[#7c3aed] rounded-full" />
-                </div>
-                <div className="flex items-center justify-between text-white text-sm">
-                  <div className="flex items-center gap-3">
-                    <span>0:00</span>
-                    <span className="text-white/50">/</span>
-                    <span>{episode.duration ? formatDuration(episode.duration) : "--:--"}</span>
+            {episode.videoUrl ? (
+              <VideoPlayerWrapper
+                videoUrl={episode.videoUrl}
+                thumbnailUrl={episode.thumbnailUrl || undefined}
+                subtitleUrl={episode.subtitleUrl || undefined}
+                title={`${series.title} — 第${episode.episodeNumber}話 ${episode.title}`}
+                episodeId={episode.id}
+              />
+            ) : (
+              <div className="relative aspect-video bg-[#12121a] rounded-2xl overflow-hidden border border-[#2a2a3e] flex flex-col items-center justify-center gap-4">
+                {episode.thumbnailUrl && (
+                  <Image src={episode.thumbnailUrl} alt={episode.title} fill className="object-cover opacity-30" />
+                )}
+                <div className="relative z-10 text-center">
+                  <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center mx-auto mb-3">
+                    <Play className="w-8 h-8 text-white/60 fill-current ml-1" />
                   </div>
+                  <p className="text-white/60 text-sm">動画URLが設定されていません</p>
+                  <p className="text-white/30 text-xs mt-1">クリエイターが動画をアップロードすると視聴できます</p>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* エピソード情報 */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-[#6b7280]">
-                <span>{series.title}</span>
+                <Link href={`/series/${series.id}`} className="hover:text-[#a78bfa] transition-colors">
+                  {series.title}
+                </Link>
                 <span>•</span>
                 <span>第{episode.episodeNumber}話</span>
               </div>
               <h1 className="text-2xl font-bold">{episode.title}</h1>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-4 text-sm text-[#6b7280]">
                   <span className="flex items-center gap-1">
                     <Eye className="w-4 h-4" />
@@ -106,17 +103,10 @@ export default async function EpisodePlayerPage({
                   </span>
                   <span>{formatRelativeTime(new Date(episode.createdAt))}</span>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a26] border border-[#2a2a3e] hover:border-[#7c3aed]/50 rounded-lg text-sm transition-all">
-                    <Heart className="w-4 h-4" />
-                    いいね
-                  </button>
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a26] border border-[#2a2a3e] hover:border-[#7c3aed]/50 rounded-lg text-sm transition-all">
-                    <Share2 className="w-4 h-4" />
-                    シェア
-                  </button>
-                </div>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a26] border border-[#2a2a3e] hover:border-[#7c3aed]/50 rounded-lg text-sm transition-all">
+                  <Share2 className="w-4 h-4" />
+                  シェア
+                </button>
               </div>
 
               {episode.description && (
@@ -124,6 +114,31 @@ export default async function EpisodePlayerPage({
                   {episode.description}
                 </p>
               )}
+            </div>
+
+            {/* クリエイター情報 + 収益化 */}
+            <div className="flex items-center justify-between p-4 bg-[#12121a] border border-[#2a2a3e] rounded-xl">
+              <Link href={`/creator/${series.author.id}`} className="flex items-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#f59e0b] flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
+                  {series.author.name?.[0] || "C"}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm group-hover:text-[#a78bfa] transition-colors">
+                    {series.author.creatorName || series.author.name}
+                  </p>
+                  <p className="text-[#6b7280] text-xs">クリエイター</p>
+                </div>
+              </Link>
+              <div className="flex gap-2">
+                <TipButton
+                  creatorId={series.author.id}
+                  creatorName={series.author.name || "クリエイター"}
+                />
+                <SubscribeButton
+                  creatorId={series.author.id}
+                  creatorName={series.author.name || "クリエイター"}
+                />
+              </div>
             </div>
 
             {/* 前後ナビゲーション */}
@@ -137,7 +152,7 @@ export default async function EpisodePlayerPage({
                   <div className="min-w-0">
                     <p className="text-xs text-[#6b7280]">前話</p>
                     <p className="text-sm font-medium truncate group-hover:text-[#a78bfa] transition-colors">
-                      第{prevEpisode.episodeNumber}話
+                      第{prevEpisode.episodeNumber}話 {prevEpisode.title}
                     </p>
                   </div>
                 </Link>
@@ -151,7 +166,7 @@ export default async function EpisodePlayerPage({
                   <div className="min-w-0 text-right">
                     <p className="text-xs text-[#6b7280]">次話</p>
                     <p className="text-sm font-medium truncate group-hover:text-[#a78bfa] transition-colors">
-                      第{nextEpisode.episodeNumber}話
+                      第{nextEpisode.episodeNumber}話 {nextEpisode.title}
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-[#6b7280] group-hover:text-[#a78bfa] transition-colors" />
@@ -159,13 +174,13 @@ export default async function EpisodePlayerPage({
               ) : <div className="flex-1" />}
             </div>
 
-            {/* コメント欄 */}
+            {/* コメント */}
             <div className="p-6 bg-[#12121a] border border-[#2a2a3e] rounded-xl">
               <h3 className="font-bold mb-4 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-[#a78bfa]" />
                 コメント ({episode._count.comments})
               </h3>
-              <div className="text-center py-8 text-[#6b7280]">
+              <div className="text-center py-6 text-[#6b7280]">
                 <p className="text-sm">ログインしてコメントする</p>
                 <Link
                   href="/auth/signin"
@@ -177,7 +192,7 @@ export default async function EpisodePlayerPage({
             </div>
           </div>
 
-          {/* サイドバー：エピソード一覧 */}
+          {/* サイドバー */}
           <div className="space-y-3">
             <h3 className="font-bold text-lg">
               {series.title}
@@ -213,9 +228,14 @@ export default async function EpisodePlayerPage({
                     <p className={`text-sm font-medium truncate ${ep.id === episodeId ? "text-[#a78bfa]" : ""}`}>
                       {ep.title}
                     </p>
-                    {ep.duration && (
-                      <p className="text-xs text-[#6b7280]">{formatDuration(ep.duration)}</p>
-                    )}
+                    <div className="flex items-center gap-2 text-[10px] text-[#6b7280]">
+                      {ep.duration && <span>{formatDuration(ep.duration)}</span>}
+                      {ep.isFree ? (
+                        <span className="text-green-400">無料</span>
+                      ) : (
+                        <span className="text-[#a78bfa]">premium</span>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}
