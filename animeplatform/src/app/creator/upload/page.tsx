@@ -1,19 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
-  Upload,
-  Film,
-  Plus,
-  Trash2,
-  ArrowLeft,
-  Sparkles,
-  CheckCircle,
+  Upload, Film, Plus, Trash2, ArrowLeft, Sparkles, CheckCircle, ExternalLink,
 } from "lucide-react";
 import { GENRES } from "@/lib/utils";
+import { QUANTUMY_CONFIG } from "@/lib/quantumy";
 
 interface EpisodeForm {
   title: string;
@@ -23,11 +18,13 @@ interface EpisodeForm {
   isFree: boolean;
 }
 
-export default function CreatorUploadPage() {
+function CreatorUploadContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fromQuantumy = searchParams.get("from") === "quantumy";
   const [success, setSuccess] = useState(false);
 
   const [seriesForm, setSeriesForm] = useState({
@@ -39,6 +36,20 @@ export default function CreatorUploadPage() {
     coverImage: "",
     status: "ongoing",
   });
+
+  // Quantumy からのパラメータを自動入力
+  useEffect(() => {
+    if (!fromQuantumy) return;
+    const title = searchParams.get("title") ?? "";
+    const titleEn = searchParams.get("titleEn") ?? "";
+    const description = searchParams.get("description") ?? "";
+    const genre = searchParams.get("genre") ?? GENRES[0];
+    const tags = searchParams.get("tags") ?? "";
+    const coverImage = searchParams.get("coverImageUrl") ?? "";
+    if (title) {
+      setSeriesForm((prev) => ({ ...prev, title, titleEn, description, genre, tags, coverImage }));
+    }
+  }, [fromQuantumy, searchParams]);
 
   const [episodes, setEpisodes] = useState<EpisodeForm[]>([
     { title: "第1話", description: "", episodeNumber: 1, videoUrl: "", isFree: true },
@@ -132,7 +143,7 @@ export default function CreatorUploadPage() {
           <Link href="/" className="text-[#6b7280] hover:text-[#e8e8f0] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-[#a78bfa]" />
               作品を投稿する
@@ -140,6 +151,25 @@ export default function CreatorUploadPage() {
             <p className="text-[#6b7280] text-sm">話数の制限なし。あなたの物語を自由に。</p>
           </div>
         </div>
+
+        {/* Quantumy からの遷移バナー */}
+        {fromQuantumy && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-[#7c3aed]/15 to-[#f59e0b]/10 border border-[#7c3aed]/40 rounded-xl flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-[#a78bfa] flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-bold text-[#a78bfa]">Quantumy からの連携</p>
+              <p className="text-xs text-[#6b7280]">作品情報が自動入力されました。確認・編集してから公開してください。</p>
+            </div>
+            <a
+              href={QUANTUMY_CONFIG.baseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#6b7280] hover:text-[#a78bfa] transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        )}
 
         {/* ステップインジケーター */}
         <div className="flex items-center gap-2 mb-8">
@@ -372,5 +402,17 @@ export default function CreatorUploadPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CreatorUploadPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <CreatorUploadContent />
+    </Suspense>
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Search, Bell, User, LogOut, PlusCircle, ChevronDown } from "lucide-react";
+import { Search, Bell, User, LogOut, PlusCircle, ChevronDown, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -43,6 +43,13 @@ export function Navbar() {
             </Link>
             <Link href="/creator" className="hover:text-[#e8e8f0] transition-colors">
               クリエイター
+            </Link>
+            <Link
+              href="/quantumy"
+              className="flex items-center gap-1 hover:text-[#a78bfa] transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Quantumy
             </Link>
           </div>
 

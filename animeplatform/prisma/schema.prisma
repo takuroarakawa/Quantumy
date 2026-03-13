@@ -2,41 +2,39 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// 開発環境: SQLite
-// 本番環境: DATABASE_URLをSupabase PostgreSQLに変更し、
-//           prisma/schema.production.prismaを参照してください
+// 開発: SQLite (DATABASE_URL=file:./prisma/dev.db)
+// 本番: scripts/use-postgres.sh を実行してから vercel deploy
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "sqlite"
+  url       = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  bio           String?
-  isCreator     Boolean   @default(false)
-  creatorName   String?
-  stripeAccountId String?
-  subscriptionPlan String @default("free")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts      Account[]
-  sessions      Session[]
-  series        Series[]
-  episodes      Episode[]
-  likes         Like[]
-  watchHistory  WatchHistory[]
-  comments      Comment[]
-  follows       Follow[]       @relation("follower")
-  followers     Follow[]       @relation("following")
-  tips          Tip[]          @relation("tipper")
-  receivedTips  Tip[]          @relation("creator")
-  subscriptions Subscription[] @relation("subscriber")
-  subscribers   Subscription[] @relation("creator_sub")
+  id               String         @id @default(cuid())
+  name             String?
+  email            String?        @unique
+  emailVerified    DateTime?
+  image            String?
+  bio              String?
+  isCreator        Boolean        @default(false)
+  creatorName      String?
+  stripeAccountId  String?
+  subscriptionPlan String         @default("free")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  accounts         Account[]
+  sessions         Session[]
+  series           Series[]
+  episodes         Episode[]
+  likes            Like[]
+  watchHistory     WatchHistory[]
+  comments         Comment[]
+  follows          Follow[]       @relation("follower")
+  followers        Follow[]       @relation("following")
+  tips             Tip[]          @relation("tipper")
+  receivedTips     Tip[]          @relation("creator")
+  subscriptions    Subscription[] @relation("subscriber")
+  subscribers      Subscription[] @relation("creator_sub")
 }
 
 model Account {
@@ -52,8 +50,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -67,28 +64,28 @@ model Session {
 }
 
 model Series {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   titleEn     String?
   description String
   genre       String
-  tags        String   @default("[]")
+  tags        String    @default("[]")
   coverImage  String?
   bannerImage String?
-  status      String   @default("ongoing")
-  isPublished Boolean  @default(false)
-  viewCount   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  authorId String
-  author   User     @relation(fields: [authorId], references: [id])
-  episodes Episode[]
-  likes    Like[]
+  status      String    @default("ongoing")
+  isPublished Boolean   @default(false)
+  viewCount   Int       @default(0)
+  quantumySourceUrl String? // Quantumy からの公開元URL
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  episodes    Episode[]
+  likes       Like[]
 }
 
 model Episode {
-  id            String   @id @default(cuid())
+  id            String         @id @default(cuid())
   title         String
   description   String?
   episodeNumber Int
@@ -98,18 +95,17 @@ model Episode {
   thumbnailUrl  String?
   thumbnailKey  String?
   subtitleUrl   String?
-  isPublished   Boolean  @default(false)
-  viewCount     Int      @default(0)
-  isFree        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  seriesId     String
-  series       Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
-  authorId     String
-  author       User     @relation(fields: [authorId], references: [id])
-  watchHistory WatchHistory[]
-  comments     Comment[]
+  isPublished   Boolean        @default(false)
+  viewCount     Int            @default(0)
+  isFree        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  seriesId      String
+  series        Series         @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  authorId      String
+  author        User           @relation(fields: [authorId], references: [id])
+  watchHistory  WatchHistory[]
+  comments      Comment[]
 }
 
 model Like {
@@ -117,9 +113,8 @@ model Like {
   userId    String
   seriesId  String
   createdAt DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
 
   @@unique([userId, seriesId])
 }
@@ -131,9 +126,8 @@ model WatchHistory {
   progress  Float    @default(0)
   completed Boolean  @default(false)
   watchedAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, episodeId])
 }
@@ -144,9 +138,8 @@ model Comment {
   userId    String
   episodeId String
   createdAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
 }
 
 model Follow {
@@ -154,40 +147,37 @@ model Follow {
   followerId  String
   followingId String
   createdAt   DateTime @default(now())
-
-  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
-  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  follower    User     @relation("follower",  fields: [followerId],  references: [id], onDelete: Cascade)
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
 
 model Tip {
-  id         String   @id @default(cuid())
-  amount     Int
-  message    String?
-  tipperId   String
-  creatorId  String
+  id                    String   @id @default(cuid())
+  amount                Int
+  message               String?
+  tipperId              String
+  creatorId             String
   stripePaymentIntentId String?
-  createdAt  DateTime @default(now())
-
-  tipper  User @relation("tipper", fields: [tipperId], references: [id], onDelete: Cascade)
-  creator User @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  createdAt             DateTime @default(now())
+  tipper                User     @relation("tipper",  fields: [tipperId],  references: [id], onDelete: Cascade)
+  creator               User     @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {
-  id           String   @id @default(cuid())
-  subscriberId String
-  creatorId    String
-  plan         String   @default("monthly")
-  amount       Int
+  id                   String    @id @default(cuid())
+  subscriberId         String
+  creatorId            String
+  plan                 String    @default("monthly")
+  amount               Int
   stripeSubscriptionId String?
-  status       String   @default("active")
-  currentPeriodEnd DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  subscriber User @relation("subscriber", fields: [subscriberId], references: [id], onDelete: Cascade)
-  creator    User @relation("creator_sub", fields: [creatorId], references: [id], onDelete: Cascade)
+  status               String    @default("active")
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  subscriber           User      @relation("subscriber",   fields: [subscriberId], references: [id], onDelete: Cascade)
+  creator              User      @relation("creator_sub",  fields: [creatorId],    references: [id], onDelete: Cascade)
 
   @@unique([subscriberId, creatorId])
 }

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { HeroSection } from "@/components/series/HeroSection";
 import { SeriesGrid } from "@/components/series/SeriesGrid";

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { SessionProvider } from "@/components/layout/SessionProvider";
+import { UnifiedHeader } from "@/components/layout/UnifiedHeader";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export const metadata: Metadata = {
   title: "Elementary — 自由なアニメプラットフォーム",
@@ -32,8 +34,11 @@ export default function RootLayout({
       </head>
       <body className="bg-[#0a0a0f] text-[#e8e8f0] min-h-screen">
         <SessionProvider>
+          <UnifiedHeader />
           <Navbar />
-          <main className="pt-16">{children}</main>
+          <main className="pt-24">
+            <PageTransition>{children}</PageTransition>
+          </main>
         </SessionProvider>
       </body>
     </html>
