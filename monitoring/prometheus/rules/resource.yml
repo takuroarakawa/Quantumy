@@ -1,0 +1,44 @@
+groups:
+  - name: resource
+    interval: 30s
+    rules:
+      # CPU使用率85%超で5分
+      - alert: HighCpuUsage
+        expr: |
+          (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          action: notify
+        annotations:
+          summary: "CPU使用率高 ({{ $value | humanizePercentage }})"
+
+      # メモリ使用率90%超
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            1 - (
+              node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes
+            )
+          ) > 0.90
+        for: 3m
+        labels:
+          severity: critical
+          action: restart_instance
+        annotations:
+          summary: "メモリ使用率危機的 ({{ $value | humanizePercentage }})"
+          description: "メモリ不足によりOOMKillerが発動する可能性があります"
+
+      # ディスク使用率85%超
+      - alert: DiskUsageHigh
+        expr: |
+          (
+            (node_filesystem_size_bytes - node_filesystem_free_bytes)
+            / node_filesystem_size_bytes
+          ) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          action: notify
+        annotations:
+          summary: "ディスク使用率高 ({{ $labels.mountpoint }})"

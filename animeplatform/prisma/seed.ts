@@ -85,22 +85,22 @@ const seriesData = [
 
 async function main() {
   const creator = await prisma.user.upsert({
-    where: { email: "creator@animefree.jp" },
+    where: { email: "creator@elementary.jp" },
     update: {},
     create: {
-      email: "creator@animefree.jp",
-      name: "アニメFREE編集部",
+      email: "creator@elementary.jp",
+      name: "Elementary編集部",
       isCreator: true,
-      creatorName: "AnimeFREE Studio",
+      creatorName: "Elementary Studio",
       bio: "12話の縛りを超えて、自由なアニメ表現を追求するスタジオです。",
     },
   });
 
   const creator2 = await prisma.user.upsert({
-    where: { email: "indie@animefree.jp" },
+    where: { email: "indie@elementary.jp" },
     update: {},
     create: {
-      email: "indie@animefree.jp",
+      email: "indie@elementary.jp",
       name: "田中アキラ",
       isCreator: true,
       creatorName: "Akira Animation",

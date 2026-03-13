@@ -1,0 +1,61 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ["alertname", "job", "severity"]
+  group_wait:      30s
+  group_interval:  5m
+  repeat_interval: 4h
+  receiver: "rust-alert-handler"
+
+  routes:
+    # Critical → Rust ハンドラー + Slack
+    - matchers:
+        - severity="critical"
+      receiver: "rust-alert-handler"
+      continue: true
+
+    # セキュリティアラート
+    - matchers:
+        - action="notify_security"
+      receiver: "security-team"
+
+    # 経営陣通知
+    - matchers:
+        - action="notify_management"
+      receiver: "management"
+
+receivers:
+  # ─── Rust アラートハンドラー（自動アクション実行） ────
+  - name: "rust-alert-handler"
+    webhook_configs:
+      - url: "http://rust-alert-handler:8090/webhook"
+        send_resolved: true
+        http_config:
+          bearer_token: "${ALERT_HANDLER_TOKEN}"
+
+  # ─── Slack 通知 ────────────────────────────────────
+  - name: "slack-ops"
+    slack_configs:
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#elementary-ops"
+        title: '[{{ .Status | toUpper }}] {{ .CommonAnnotations.summary }}'
+        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        send_resolved: true
+
+  - name: "security-team"
+    slack_configs:
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#security-alerts"
+        title: '[SECURITY] {{ .CommonAnnotations.summary }}'
+
+  - name: "management"
+    slack_configs:
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#management-alerts"
+
+inhibit_rules:
+  # Critical が発火中は Warning を抑制
+  - source_matchers: [severity="critical"]
+    target_matchers: [severity="warning"]
+    equal: ["job", "instance"]

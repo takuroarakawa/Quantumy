@@ -43,10 +43,10 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#f59e0b] flex items-center justify-center font-bold text-white">
-              AF
+              E
             </div>
             <span className="font-bold text-2xl">
-              Anime<span className="text-[#a78bfa]">FREE</span>
+              <span className="text-[#a78bfa]">Elementary</span>
             </span>
           </Link>
           <p className="text-[#6b7280] text-sm mt-2">12話の縛りを超えて、自由なアニメ体験へ</p>
@@ -129,7 +129,7 @@ export default function SignInPage() {
             <div className="flex items-center gap-3 p-3 bg-[#0a0a0f] rounded-xl border border-[#2a2a3e]/50">
               <Film className="w-5 h-5 text-[#a78bfa] flex-shrink-0" />
               <p className="text-xs text-[#6b7280] leading-relaxed">
-                AnimeFREEはクリエイターと視聴者が直接つながる、12話の縛りのない自由なアニメプラットフォームです。
+                Elementaryはクリエイターと視聴者が直接つながる、12話の縛りのない自由なアニメプラットフォームです。
               </p>
             </div>
           </div>

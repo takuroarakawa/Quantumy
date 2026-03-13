@@ -10,7 +10,7 @@ export const r2Client = new S3Client({
   },
 });
 
-export const R2_BUCKET = process.env.R2_BUCKET_NAME || "animefree-videos";
+export const R2_BUCKET = process.env.R2_BUCKET_NAME || "elementary-videos";
 export const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
 
 export async function createPresignedUploadUrl(

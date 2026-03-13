@@ -4,12 +4,12 @@ import { Navbar } from "@/components/layout/Navbar";
 import { SessionProvider } from "@/components/layout/SessionProvider";
 
 export const metadata: Metadata = {
-  title: "AnimeFREE — 自由なアニメプラットフォーム",
+  title: "Elementary — 自由なアニメプラットフォーム",
   description:
     "12話の縛りを超えて。日本初のクリエイターファーストアニメ配信プラットフォーム。あなたの物語を、あなたのペースで。",
   keywords: ["アニメ", "配信", "クリエイター", "インディー", "自由", "短編", "オリジナル"],
   openGraph: {
-    title: "AnimeFREE",
+    title: "Elementary",
     description: "12話の縛りを超えて。自由なアニメ表現を。",
     type: "website",
   },

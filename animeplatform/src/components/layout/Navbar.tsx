@@ -26,10 +26,10 @@ export function Navbar() {
           {/* ロゴ */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#f59e0b] flex items-center justify-center font-bold text-white text-sm">
-              AF
+              E
             </div>
             <span className="font-bold text-lg tracking-tight">
-              Anime<span className="text-[#a78bfa]">FREE</span>
+              <span className="text-[#a78bfa]">Elementary</span>
             </span>
           </Link>
 

@@ -1,0 +1,94 @@
+{
+  "title": "Elementary — サービス監視ダッシュボード",
+  "uid": "elementary-overview",
+  "schemaVersion": 38,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "gridPos": {"x":0,"y":0,"w":4,"h":3},
+      "title": "サービス稼働状態",
+      "options": { "colorMode": "background", "graphMode": "none" },
+      "targets": [{
+        "expr": "up{job=~\"elementary.*\"}",
+        "legendFormat": "{{job}}"
+      }]
+    },
+    {
+      "id": 2, "type": "timeseries", "gridPos": {"x":0,"y":3,"w":12,"h":8},
+      "title": "レスポンスタイム P50/P95/P99",
+      "fieldConfig": {
+        "defaults": { "unit": "s", "color": {"mode":"palette-classic"} }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "P50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "P95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "P99"
+        }
+      ]
+    },
+    {
+      "id": 3, "type": "timeseries", "gridPos": {"x":12,"y":3,"w":12,"h":8},
+      "title": "エラーレート (5xx)",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "steps": [
+              {"color":"green","value":null},
+              {"color":"yellow","value":0.01},
+              {"color":"red","value":0.05}
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m])",
+        "legendFormat": "{{job}} 5xx率"
+      }]
+    },
+    {
+      "id": 4, "type": "timeseries", "gridPos": {"x":0,"y":11,"w":8,"h":8},
+      "title": "リクエスト数 (RPS)",
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [{
+        "expr": "rate(http_requests_total[5m])",
+        "legendFormat": "{{job}} {{method}}"
+      }]
+    },
+    {
+      "id": 5, "type": "timeseries", "gridPos": {"x":8,"y":11,"w":8,"h":8},
+      "title": "CPU使用率",
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1 } },
+      "targets": [{
+        "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+        "legendFormat": "CPU"
+      }]
+    },
+    {
+      "id": 6, "type": "timeseries", "gridPos": {"x":16,"y":11,"w":8,"h":8},
+      "title": "メモリ使用率",
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1 } },
+      "targets": [{
+        "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+        "legendFormat": "Memory"
+      }]
+    },
+    {
+      "id": 7, "type": "logs", "gridPos": {"x":0,"y":19,"w":24,"h":8},
+      "title": "アクティブアラート",
+      "targets": [{
+        "expr": "ALERTS{alertstate=\"firing\"}",
+        "legendFormat": "{{alertname}} [{{severity}}]"
+      }]
+    }
+  ]
+}
