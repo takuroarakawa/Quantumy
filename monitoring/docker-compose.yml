@@ -75,25 +75,8 @@ services:
     networks:
       - monitoring
 
-  # ─── Rust アラートハンドラー ──────────────────────────
-  rust-alert-handler:
-    build:
-      context: ./rust-alert
-      dockerfile: Dockerfile
-    container_name: elementary-alert-handler
-    restart: unless-stopped
-    environment:
-      LISTEN_ADDR: "0.0.0.0:8090"
-      ELEMENTARY_API_URL: ${ELEMENTARY_API_URL:-http://localhost:3000}
-      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
-      INSTANCE_RESTART_SCRIPT: /scripts/restart_instance.sh
-    volumes:
-      - ./rust-alert/scripts:/scripts:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "8090:8090"
-    networks:
-      - monitoring
+  # Rust アラートハンドラーは cargo build 後に有効化
+  # rust-alert-handler は monitoring/rust-alert/ を参照
 
 volumes:
   prometheus_data:

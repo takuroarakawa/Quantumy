@@ -11,7 +11,7 @@ groups:
           action: restart_instance
         annotations:
           summary: "サービスがダウン: {{ $labels.job }}"
-          description: "{{ $labels.instance }} が {{ $for }} 間ダウンしています。自動再起動を実行。"
+          description: "{{ $labels.instance }} がダウンしています。自動再起動を実行。"
 
       # SLO: 可用性99.9%未満（1ヶ月の計算）
       - alert: SLOAvailabilityBreach

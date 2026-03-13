@@ -29,30 +29,23 @@ receivers:
   # ─── Rust アラートハンドラー（自動アクション実行） ────
   - name: "rust-alert-handler"
     webhook_configs:
-      - url: "http://rust-alert-handler:8090/webhook"
+      - url: "http://host.docker.internal:8090/webhook"
         send_resolved: true
-        http_config:
-          bearer_token: "${ALERT_HANDLER_TOKEN}"
 
-  # ─── Slack 通知 ────────────────────────────────────
+  # ─── Slack 通知 ─────────────────────────────────────
+  # SLACK_WEBHOOK_URL を設定した場合は slack_configs を有効化してください
   - name: "slack-ops"
-    slack_configs:
-      - api_url: "${SLACK_WEBHOOK_URL}"
-        channel: "#elementary-ops"
-        title: '[{{ .Status | toUpper }}] {{ .CommonAnnotations.summary }}'
-        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
         send_resolved: true
 
   - name: "security-team"
-    slack_configs:
-      - api_url: "${SLACK_WEBHOOK_URL}"
-        channel: "#security-alerts"
-        title: '[SECURITY] {{ .CommonAnnotations.summary }}'
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
 
   - name: "management"
-    slack_configs:
-      - api_url: "${SLACK_WEBHOOK_URL}"
-        channel: "#management-alerts"
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
 
 inhibit_rules:
   # Critical が発火中は Warning を抑制

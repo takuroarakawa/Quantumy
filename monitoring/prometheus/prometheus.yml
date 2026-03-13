@@ -5,13 +5,11 @@ global:
     environment: production
     service: elementary
 
-# Alertmanager に通知を送る
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: ["alertmanager:9093"]
+        - targets: ["172.18.0.2:9093"]
 
-# アラートルールのファイルを読み込む
 rule_files:
   - "rules/response_time.yml"
   - "rules/error_rate.yml"
@@ -19,32 +17,27 @@ rule_files:
   - "rules/resource.yml"
 
 scrape_configs:
-  # ─── Elementary Next.js アプリ ─────────────────────
-  # next-prom-client 等で /metrics を公開している前提
-  - job_name: "elementary-app"
-    static_configs:
-      - targets: ["host.docker.internal:3000"]
-    metrics_path: /metrics
-    scrape_interval: 10s
-
-  # ─── Manga-Math Rust API ────────────────────────────
-  - job_name: "manga-math-api"
-    static_configs:
-      - targets: ["host.docker.internal:8080"]
-    metrics_path: /metrics
-    scrape_interval: 10s
-
-  # ─── Node Exporter (OS メトリクス) ──────────────────
-  - job_name: "node"
-    static_configs:
-      - targets: ["node-exporter:9100"]
-
-  # ─── PostgreSQL Exporter ────────────────────────────
-  - job_name: "postgresql"
-    static_configs:
-      - targets: ["host.docker.internal:9187"]
-
   # ─── Prometheus 自身 ────────────────────────────────
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
+
+  # ─── Node Exporter (OS メトリクス) ──────────────────
+  # hostネットワークで起動中 (port 9101)
+  - job_name: "node"
+    static_configs:
+      - targets: ["172.18.0.1:9101"]
+
+  # ─── Elementary Next.js アプリ ──────────────────────
+  # /metrics エンドポイント公開後に有効化
+  - job_name: "elementary-app"
+    static_configs:
+      - targets: ["172.18.0.1:3000"]
+    metrics_path: /metrics
+
+  # ─── Manga-Math Rust API ───────────────────────────
+  # /metrics エンドポイント公開後に有効化
+  - job_name: "manga-math-api"
+    static_configs:
+      - targets: ["172.18.0.1:8080"]
+    metrics_path: /metrics
