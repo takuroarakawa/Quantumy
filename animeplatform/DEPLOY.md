@@ -1,76 +1,78 @@
 # Elementary — Vercel デプロイガイド
 
-## 最速の方法: Vercel GitHub 連携（推奨）
+## 最速デプロイ（2ステップ）
 
-### Step 1: Vercel にインポート
-1. https://vercel.com/new を開く
-2. "Import Git Repository" → `takuroarakawa/Elementary` を選択（旧Quantumy）
-3. **Root Directory** を `animeplatform` に設定
-4. **Build Command** を `bash scripts/use-postgres.sh && prisma generate && next build` に設定
+### ① VERCEL_TOKEN を取得（30秒）
 
-### Step 2: Vercel Postgres（Neon）を追加
-1. Vercel Dashboard → Storage → Create → Postgres
-2. データベース名: `elementary-db`
-3. リージョン: `iad1`（東京は `kix1`）
-4. 作成後、Environment Variables に自動追加される
+1. https://vercel.com/account/tokens を開く
+2. "Create Token" → 名前: `elementary-deploy` → "Create"
+3. 表示されたトークンをコピー（1回しか表示されない）
 
-### Step 3: 環境変数を設定
-Vercel Dashboard → Settings → Environment Variables に以下を追加:
+### ② Cursor Secrets に登録してエージェントを再起動
 
-| 変数名 | 値 |
-|--------|-----|
-| `DB_PROVIDER` | `postgresql` |
-| `NEXTAUTH_SECRET` | `openssl rand -base64 32` の出力 |
-| `NEXTAUTH_URL` | `https://YOUR_APP.vercel.app` |
-| `NEXT_PUBLIC_QUANTUMY_URL` | `https://quantumy.vercel.app` |
-| `STRIPE_SECRET_KEY` | Stripe Dashboard から取得 |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | 同上 |
-| `R2_ACCOUNT_ID` | Cloudflare Dashboard から取得 |
-| `R2_ACCESS_KEY_ID` | 同上 |
-| `R2_SECRET_ACCESS_KEY` | 同上 |
-| `R2_BUCKET_NAME` | `elementary-videos` |
-| `R2_PUBLIC_URL` | `https://YOUR_BUCKET.r2.dev` |
-
-### Step 4: schema.prisma を PostgreSQL に変更
-本番デプロイ時は `scripts/use-postgres.sh` が自動実行されます。
-
----
-
-## GitHub Actions 自動デプロイの設定
-
-### GitHub Secrets に以下を追加:
-Settings → Secrets and variables → Actions → New repository secret
-
-| シークレット名 | 取得方法 |
-|--------------|---------|
-| `VERCEL_TOKEN` | https://vercel.com/account/tokens で作成 |
-| `VERCEL_ORG_ID` | `vercel.json` または `vercel env ls` で確認 |
-| `VERCEL_PROJECT_ID` | 同上 |
-
-### Cursor Secrets への登録:
 https://cursor.com/settings → Secrets → Add Secret
 
-- `VERCEL_TOKEN` = Vercelトークン
+| Key | Value |
+|-----|-------|
+| `VERCEL_TOKEN` | 上でコピーしたトークン |
+
+登録後、このエージェントに「デプロイして」と伝えると自動実行します。
 
 ---
 
-## Vercel Postgres でのデータベース初期化
+## 手動デプロイ（ターミナルから）
 
 ```bash
-# Vercel CLI でローカルから本番DBに接続
-vercel env pull .env.production.local
-DATABASE_URL=$(cat .env.production.local | grep DATABASE_URL | cut -d= -f2-)
-bash scripts/use-postgres.sh
-DATABASE_URL=$DATABASE_URL npx prisma db push
-DATABASE_URL=$DATABASE_URL npx tsx prisma/seed.ts
-bash scripts/use-sqlite.sh
+cd animeplatform
+export VERCEL_TOKEN="<your-token>"
+bash scripts/deploy-vercel.sh
 ```
 
 ---
 
-## Quantumy との連携確認
+## Vercel Web UI からデプロイ（ノーコード）
 
-デプロイ後、以下のURLで連携を確認:
-- `https://YOUR_APP.vercel.app/quantumy` — ブリッジページ
-- `https://YOUR_APP.vercel.app/creator/upload?from=quantumy&title=AI生成マンガ&genre=SF` — 自動入力テスト
-- `https://YOUR_APP.vercel.app/q` — `/quantumy` のショートURL
+1. https://vercel.com/new を開く
+2. `takuroarakawa/Quantumy` を選択
+3. **Root Directory** → `animeplatform`
+4. **Build Command** → `bash scripts/use-postgres.sh && prisma generate && next build`
+5. **Environment Variables** を以下で設定:
+
+| 変数名 | 値 | 必須 |
+|--------|-----|------|
+| `DATABASE_URL` | Vercel Postgres URL（自動設定） | ✅ |
+| `NEXTAUTH_SECRET` | `openssl rand -base64 32` の出力 | ✅ |
+| `NEXTAUTH_URL` | `https://YOUR_APP.vercel.app` | ✅ |
+| `NEXT_PUBLIC_QUANTUMY_URL` | `https://uiux-quamtumy-lr4u.vercel.app` | ✅ |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard から | 収益化時 |
+| `R2_BUCKET_NAME` | `elementary-videos` | 動画時 |
+
+6. Storage タブ → Postgres → Create（自動で DATABASE_URL が設定される）
+7. "Deploy" ボタンを押す
+
+---
+
+## GitHub Actions 自動デプロイ
+
+`animeplatform/.github/workflows/deploy.yml` が設定済み。
+
+GitHub Secrets に以下を追加すれば、プッシュのたびに自動デプロイ:
+
+| Secret | 取得方法 |
+|--------|---------|
+| `VERCEL_TOKEN` | https://vercel.com/account/tokens |
+| `VERCEL_ORG_ID` | `vercel.json` の設定後 `vercel env ls` |
+| `VERCEL_PROJECT_ID` | 同上 |
+
+---
+
+## プラットフォーム構成（デプロイ後）
+
+```
+https://elementary-anime.vercel.app          ← Elementary
+  /quantumy                                  ← ブリッジページ
+  /creator/upload?from=quantumy              ← DoctorCanvas連携
+
+https://uiux-quamtumy-lr4u.vercel.app        ← Quantumy (DoctorCanvas)
+  「⚡ Elementaryで世界に公開する」ボタン
+```

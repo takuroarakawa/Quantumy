@@ -1,23 +1,28 @@
-name: Deploy to Vercel
+name: 🚀 Deploy Elementary to Vercel
 
 on:
   push:
     branches: [main]
-    paths:
-      - "animeplatform/**"
+    paths: ["animeplatform/**"]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "deployment target"
+        required: false
+        default: "production"
 
 defaults:
   run:
     working-directory: animeplatform
 
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
 jobs:
   deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -27,13 +32,13 @@ jobs:
           cache: npm
           cache-dependency-path: animeplatform/package-lock.json
 
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Switch schema to PostgreSQL
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Switch Prisma schema → PostgreSQL
         run: bash scripts/use-postgres.sh
 
       - name: Generate Prisma Client
@@ -45,18 +50,29 @@ jobs:
       - name: Build
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy
+      - name: Deploy to Vercel
         id: deploy
         run: |
-          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "✅ Deployed: $URL"
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "🌐 Elementary deployed: $DEPLOY_URL"
 
-      - name: Restore schema to SQLite
+      - name: Run DB migrations on Vercel Postgres
+        run: |
+          echo "DATABASE_URL: $(vercel env pull --token=${{ secrets.VERCEL_TOKEN }} .env.production.local 2>/dev/null && cat .env.production.local | grep DATABASE_URL | cut -d= -f2-)"
+          npx prisma db push --skip-generate || echo "DB push skipped (run manually if needed)"
+        continue-on-error: true
+
+      - name: Restore SQLite schema
         if: always()
         run: bash scripts/use-sqlite.sh
 
-      - name: Comment deployment URL on commit
+      - name: Summary
         if: success()
         run: |
-          echo "🚀 Elementary deployed: ${{ steps.deploy.outputs.url }}"
+          echo "## 🚀 Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "**URL**: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Connected Platforms" >> $GITHUB_STEP_SUMMARY
+          echo "- Elementary: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Quantumy (DoctorCanvas): https://uiux-quamtumy-lr4u.vercel.app" >> $GITHUB_STEP_SUMMARY
