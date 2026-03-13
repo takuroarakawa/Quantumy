@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DoctorCanvas - Quantumy</title>
+  <title>Quantumy — PhD研究のマンガ化コンセプト</title>
   <style>html { scroll-behavior: smooth; }</style>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
@@ -31,6 +31,14 @@
     }
 
     // ─── データ ──────────────────────────────────────────────
+    // ─── サービス情報 ─────────────────────────────────────────
+    const SERVICE = {
+      name: 'Quantumy',
+      tagline: 'PhD研究のマンガ化コンセプト',
+      description: '博士研究の成果をAIがマンガに変換し、Elementaryで世界に配信するプラットフォーム。',
+      version: 'Phase 1',
+    };
+
     const doctorProfile = {
       name: '博士漫画家',
       degree: 'Ph.D. in Physics',
@@ -233,6 +241,41 @@
             padding: '3rem 2rem 2.5rem', maxWidth: '720px',
             margin: '0 auto', width: '100%', boxSizing: 'border-box'
           }}>
+            {/* ─── サービスヘッダー ─── */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: '1rem'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+                  <span style={{
+                    fontSize: '1.45rem', fontWeight: 900, color: '#ffe03a',
+                    letterSpacing: '0.04em'
+                  }}>
+                    Quantumy
+                  </span>
+                  <span style={{
+                    fontSize: '0.7rem', color: '#5a6c87', fontWeight: 500,
+                    padding: '0.1rem 0.5rem',
+                    border: '1px solid #b2bec3', borderRadius: '4px'
+                  }}>
+                    Phase 1
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#5a6c87', fontWeight: 500 }}>
+                  PhD研究のマンガ化コンセプト
+                </p>
+              </div>
+              <a href="https://elementary-anime.vercel.app/quantumy" target="_blank" rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.75rem', color: '#3f51b5',
+                  textDecoration: 'none', padding: '0.3rem 0.7rem',
+                  border: '1px solid #3f51b5', borderRadius: '6px'
+                }}>
+                Elementary との連携 →
+              </a>
+            </div>
+
             <h1 style={{
               fontSize: '1.75rem', color: '#192841', marginBottom: '1.5rem',
               fontWeight: 700, letterSpacing: '0.02em'
@@ -438,7 +481,8 @@
               <footer style={{ marginTop: 'auto', paddingTop: '1.3rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <ElementaryPublishButton compact={true} />
                 <p style={{ fontSize: '11px', color: '#b2bec3', marginTop: '0.75rem' }}>
-                  <span style={{ color: '#ccffff' }}>Quantumy Doctor Canvas</span> (Phase 1)
+                  <span style={{ color: '#ffe03a', fontWeight: 700 }}>Quantumy</span>
+                  <span style={{ color: '#b2bec3' }}> — PhD研究のマンガ化コンセプト</span>
                   <br />
                   <a href={`${ELEMENTARY_URL}/quantumy`} target="_blank" rel="noopener noreferrer"
                     style={{ color: '#91d6fe', textDecoration: 'none' }}>

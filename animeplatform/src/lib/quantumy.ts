@@ -12,9 +12,8 @@
 export const QUANTUMY_CONFIG = {
   // UIUX_Quamtumy = DoctorCanvas の実稼働URL
   baseUrl: process.env.NEXT_PUBLIC_QUANTUMY_URL ?? "https://uiux-quamtumy-lr4u.vercel.app",
-  // Quantumy コンセプトリポジトリ
-  githubUrl: "https://github.com/takuroarakawa/UIUX_Quamtumy",
-  conceptGithubUrl: "https://github.com/takuroarakawa/Quantumy",
+  // リポジトリ (UIUX_Quamtumy → Quantumy にリネーム後)
+  githubUrl: "https://github.com/takuroarakawa/Quantumy",
   description: "DoctorCanvas — PhD研究のマンガ化プラットフォーム",
   // DoctorCanvas のデザイントークン（Elementary との共鳴に使用）
   colors: {

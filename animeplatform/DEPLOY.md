@@ -4,7 +4,7 @@
 
 ### Step 1: Vercel にインポート
 1. https://vercel.com/new を開く
-2. "Import Git Repository" → `takuroarakawa/Quantumy` を選択
+2. "Import Git Repository" → `takuroarakawa/Elementary` を選択（旧Quantumy）
 3. **Root Directory** を `animeplatform` に設定
 4. **Build Command** を `bash scripts/use-postgres.sh && prisma generate && next build` に設定
 
