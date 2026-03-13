@@ -17,15 +17,16 @@ export function UnifiedHeader() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="fixed top-0 left-0 right-0 z-[60] h-8 bg-gradient-to-r from-[#7c3aed]/90 via-[#0a0a0f]/80 to-[#f59e0b]/20 backdrop-blur-md border-b border-white/5 flex items-center px-4 gap-4 text-xs"
     >
-      {/* Quantumy リンク */}
+      {/* DoctorCanvas リンク */}
       <a
         href={QUANTUMY_CONFIG.baseUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1.5 text-[#a78bfa] hover:text-white transition-colors group"
+        className="flex items-center gap-1.5 hover:text-white transition-colors group"
+        style={{ color: "#ffe03a" }}
       >
         <Sparkles className="w-3 h-3 group-hover:animate-pulse" />
-        <span className="font-bold tracking-tight">Quantumy</span>
+        <span className="font-bold tracking-tight">DoctorCanvas</span>
         <ExternalLink className="w-2.5 h-2.5 opacity-50" />
       </a>
 
@@ -42,15 +43,20 @@ export function UnifiedHeader() {
 
       <div className="flex-1" />
 
-      {/* AIで作る CTA */}
+      {/* DoctorCanvas CTA */}
       <a
         href={QUANTUMY_CONFIG.baseUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#7c3aed]/40 to-[#f59e0b]/20 border border-[#7c3aed]/40 text-[#a78bfa] hover:border-[#a78bfa] transition-all text-[10px] font-medium"
+        className="flex items-center gap-1 px-2.5 py-0.5 rounded-full border transition-all text-[10px] font-medium hover:opacity-90"
+        style={{
+          background: "rgba(255,224,58,0.15)",
+          borderColor: "rgba(255,224,58,0.4)",
+          color: "#ffe03a",
+        }}
       >
         <Sparkles className="w-2.5 h-2.5" />
-        AIでマンガを生成する
+        PhD研究をマンガ化
       </a>
     </motion.div>
   );

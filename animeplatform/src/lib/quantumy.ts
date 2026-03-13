@@ -10,10 +10,20 @@
  */
 
 export const QUANTUMY_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_QUANTUMY_URL ?? "https://quantumy.vercel.app",
-  apiUrl: process.env.NEXT_PUBLIC_QUANTUMY_API_URL ?? "https://api.quantumy.vercel.app",
-  githubUrl: "https://github.com/takuroarakawa/Quantumy",
-  description: "PhD research's outcome has drawing manga by AI.",
+  // UIUX_Quamtumy = DoctorCanvas の実稼働URL
+  baseUrl: process.env.NEXT_PUBLIC_QUANTUMY_URL ?? "https://uiux-quamtumy-lr4u.vercel.app",
+  // Quantumy コンセプトリポジトリ
+  githubUrl: "https://github.com/takuroarakawa/UIUX_Quamtumy",
+  conceptGithubUrl: "https://github.com/takuroarakawa/Quantumy",
+  description: "DoctorCanvas — PhD研究のマンガ化プラットフォーム",
+  // DoctorCanvas のデザイントークン（Elementary との共鳴に使用）
+  colors: {
+    bg: "#0f1419",
+    primary: "#253358",
+    accent: "#ffe03a",
+    text: "#e8ecf4",
+    blue: "#3f51b5",
+  },
 } as const;
 
 export const ELEMENTARY_CONFIG = {
@@ -52,8 +62,8 @@ export function buildPublishUrl(payload: QuantumyPublishPayload): string {
 }
 
 export function buildQuantumyCreateUrl(seriesId?: string): string {
-  if (seriesId) {
-    return `${QUANTUMY_CONFIG.baseUrl}/create?elementarySeriesId=${seriesId}`;
-  }
-  return `${QUANTUMY_CONFIG.baseUrl}/create?from=elementary`;
+  // DoctorCanvas はシングルページなのでクエリパラメータでコンテキストを渡す
+  const params = new URLSearchParams({ from: "elementary" });
+  if (seriesId) params.set("elementarySeriesId", seriesId);
+  return `${QUANTUMY_CONFIG.baseUrl}/?${params}`;
 }
