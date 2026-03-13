@@ -5,6 +5,7 @@ mod models;
 mod routes;
 
 use axum::Router;
+use axum_prometheus::PrometheusMetricLayer;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
@@ -21,14 +22,13 @@ async fn main() -> anyhow::Result<()> {
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "manga_math_api=debug,tower_http=debug".into()),
+            std::env::var("RUST_LOG")
+                .unwrap_or_else(|_| "manga_math_api=debug,tower_http=debug".into()),
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
-
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = db::create_pool(&database_url).await?;
     db::run_migrations(&pool).await?;
 
@@ -42,7 +42,15 @@ async fn main() -> anyhow::Result<()> {
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let app = routes::create_router(state)
+    // ─── Prometheus メトリクス設定 ──────────────────────────────
+    // PrometheusMetricLayer が自動的に以下を収集:
+    //   axum_http_requests_total{method, endpoint, status}
+    //   axum_http_requests_duration_seconds{method, endpoint, status}
+    //   axum_http_requests_pending{method, endpoint}
+    let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
+
+    let app = routes::create_router(state, axum_prometheus::Handle(metric_handle))
+        .layer(prometheus_layer)   // 全ルートに自動計測
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 
@@ -50,6 +58,7 @@ async fn main() -> anyhow::Result<()> {
     let listener = tokio::net::TcpListener::bind(&addr).await?;
 
     tracing::info!("Elementary Manga-Math API — listening on {}", addr);
+    tracing::info!("Prometheus metrics: http://{}/metrics", addr);
     axum::serve(listener, app).await?;
 
     Ok(())

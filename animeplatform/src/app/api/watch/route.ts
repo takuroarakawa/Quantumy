@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { incrementVideoView } from "@/lib/metrics";
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -20,10 +21,12 @@ export async function POST(request: NextRequest) {
   });
 
   if (progress < 0.01) {
-    await prisma.episode.update({
+    const episode = await prisma.episode.update({
       where: { id: episodeId },
       data: { viewCount: { increment: 1 } },
+      select: { seriesId: true },
     });
+    incrementVideoView(episode.seriesId, episodeId);
   }
 
   return NextResponse.json({ ok: true });

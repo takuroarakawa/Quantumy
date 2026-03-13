@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { incrementTip } from "@/lib/metrics";
 import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
             stripePaymentIntentId: pi.id,
           },
         });
+        incrementTip(pi.amount);
       }
       break;
     }

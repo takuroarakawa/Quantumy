@@ -23,6 +23,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 dotenvy = "0.15"
 thiserror = "1"
 anyhow = "1"
+axum-prometheus = "0.7"
+metrics-exporter-prometheus = "0.15"
 
 [dev-dependencies]
 axum-test = "14"
