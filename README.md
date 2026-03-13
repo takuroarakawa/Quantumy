@@ -1,11 +1,107 @@
-<div align="center">
+# AnimeFREE — 自由なアニメプラットフォーム
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+> 12話の縛りを超えて。日本初のクリエイターファーストアニメ配信プラットフォーム。
 
-  <h1>Built with AI Studio</h2>
+## コンセプト
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+日本のキー局アニメは **12話構成** が常識となっており、クリエイターは本来の物語の長さに関わらず、このフォーマットに合わせることを強いられています。
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+AnimeFREEは、Netflixのような体験を日本のインディーアニメに提供します：
 
-</div>
+- **話数の自由** — 1話でも100話でも、物語が必要とする長さで
+- **即時配信** — 完成した瞬間に公開。放送スケジュール不要
+- **直接収益化** — クリエイターと視聴者が直接つながる
+- **日本発、世界へ** — 字幕機能で海外にも発信
+
+## 技術スタック
+
+| 層 | 技術 |
+|---|---|
+| フロントエンド | Next.js 15 (App Router), TypeScript, Tailwind CSS v4 |
+| バックエンド | Next.js API Routes, Prisma ORM |
+| データベース | SQLite（開発）/ PostgreSQL（本番推奨）|
+| 認証 | NextAuth.js v5 |
+| UI | Lucide Icons, カスタムダークテーマ |
+
+## セットアップ
+
+```bash
+# リポジトリクローン後
+cd animeplatform
+
+# 依存関係インストール
+npm install
+
+# 環境変数設定
+cp .env.example .env
+# .envを編集してください
+
+# データベース初期化
+npm run db:push
+
+# シードデータ投入（任意）
+npm run db:seed
+
+# 開発サーバー起動
+npm run dev
+```
+
+http://localhost:3000 でアクセス可能。
+
+## 主要機能
+
+### 視聴者
+- トップページ（ヒーロー + 作品グリッド）
+- 作品一覧・ジャンルフィルタ
+- 作品詳細・エピソード一覧
+- 動画プレイヤー（YouTube/Vimeo等の外部URLに対応）
+- 前後話ナビゲーション
+- クリエイタープロフィール
+- 全文検索
+
+### クリエイター
+- **話数制限なし**でシリーズ作品を投稿
+- エピソード個別管理（無料/プレミアム設定）
+- 自動クリエイター認定
+
+## ページ構成
+
+```
+/               トップページ（Hero + グリッド）
+/series         作品一覧（ジャンル/ステータスフィルタ）
+/series/[id]    作品詳細
+/series/[id]/episode/[episodeId]  動画プレイヤー
+/creator        クリエイター一覧
+/creator/[id]   クリエイタープロフィール
+/creator/upload 作品投稿フォーム
+/search         検索結果
+/auth/signin    ログイン/新規登録
+```
+
+## 環境変数
+
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+## dアニメストアとの比較
+
+| 項目 | dアニメストア | AnimeFREE |
+|------|------------|-----------|
+| コンテンツ | 既存放送作品の再配信 | クリエイター直接投稿 |
+| 話数制限 | 12話（放送準拠） | 制限なし |
+| クリエイター | 大手制作会社のみ | 誰でも投稿可 |
+| 字幕 | なし | 対応予定 |
+| 同時視聴 | 1台 | 制限なし（予定）|
+| 月額 | 660円〜 | 無料＋プレミアム（予定）|
+
+## ロードマップ
+
+- [ ] 動画ファイル直接アップロード（S3/Cloudflare R2）
+- [ ] 日本語/英語字幕対応
+- [ ] クリエイター収益化（サブスク/投げ銭）
+- [ ] モバイルアプリ（React Native）
+- [ ] AIあらすじ自動生成
+- [ ] コラボ機能（複数クリエイター作品）
