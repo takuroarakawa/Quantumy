@@ -1,0 +1,38 @@
+groups:
+  - name: availability
+    interval: 15s
+    rules:
+      # サービスが30秒以上ダウン → 即時アクション
+      - alert: ServiceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+          action: restart_instance
+        annotations:
+          summary: "サービスがダウン: {{ $labels.job }}"
+          description: "{{ $labels.instance }} がダウンしています。自動再起動を実行。"
+
+      # SLO: 可用性99.9%未満（1ヶ月の計算）
+      - alert: SLOAvailabilityBreach
+        expr: |
+          (
+            1 - (
+              sum_over_time(up[30d]) / count_over_time(up[30d])
+            )
+          ) > 0.001
+        labels:
+          severity: critical
+          action: notify_management
+        annotations:
+          summary: "SLO違反: 可用性 99.9% を下回りました"
+
+      # エンドポイントの死活監視（Blackbox Exporter 連携）
+      - alert: EndpointUnreachable
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+          action: restart_instance
+        annotations:
+          summary: "エンドポイント到達不能: {{ $labels.instance }}"

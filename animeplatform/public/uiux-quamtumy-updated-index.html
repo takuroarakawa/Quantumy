@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantumy — PhD研究のマンガ化コンセプト</title>
+  <style>html { scroll-behavior: smooth; }</style>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ─── Elementary 連携設定 ──────────────────────────────────
+    const ELEMENTARY_URL = 'https://elementary-anime.vercel.app';
+
+    function buildElementaryPublishUrl({ title, genre, tags, coverImageUrl, sourceUrl, authorName }) {
+      const params = new URLSearchParams({
+        from: 'quantumy',
+        title: title || '量子情報のマンガ',
+        genre: genre || 'SF',
+        tags: (tags || []).join(','),
+        sourceUrl: sourceUrl || window.location.href,
+        authorName: authorName || doctorProfile.name,
+      });
+      if (coverImageUrl) params.set('coverImageUrl', coverImageUrl);
+      return `${ELEMENTARY_URL}/creator/upload?${params}`;
+    }
+
+    // ─── データ ──────────────────────────────────────────────
+    // ─── サービス情報 ─────────────────────────────────────────
+    const SERVICE = {
+      name: 'Quantumy',
+      tagline: 'PhD研究のマンガ化コンセプト',
+      description: '博士研究の成果をAIがマンガに変換し、Elementaryで世界に配信するプラットフォーム。',
+      version: 'Phase 1',
+    };
+
+    const doctorProfile = {
+      name: '博士漫画家',
+      degree: 'Ph.D. in Physics',
+      field: '量子情報・量子もつれ',
+      avatarUrl: 'https://dummyimage.com/160x160/253358/ffe03a&text=DR',
+    };
+
+    const mangaPages = [
+      { imageUrl: 'https://dummyimage.com/600x900/ebf5fb/333&text=1', pageNumber: 1 },
+      { imageUrl: 'https://dummyimage.com/600x900/d6eaf8/333&text=2', pageNumber: 2 },
+      { imageUrl: 'https://dummyimage.com/600x900/aed6f1/333&text=3', pageNumber: 3 },
+    ];
+
+    const references = [
+      {
+        title: "Quantum Entanglement and Information",
+        author: "A. Einstein, B. Podolsky, N. Rosen",
+        doi: "10.1103/PhysRev.47.777",
+        summary: "量子力学における相関した二粒子系について、局所実在論との矛盾を指摘した古典的論文。のちのEPRパラドックスとして知られ、量子情報の基礎づけに影響を与えた。"
+      },
+      {
+        title: "A New Kind of Science",
+        author: "Stephen Wolfram",
+        doi: "10.5555/nks.123456",
+        summary: "単純なルールから複雑な振る舞いが生まれるセルオートマトン等を扱う。計算論的な視点から自然界の複雑系を探求し、科学の新しい枠組みを提唱している。"
+      },
+    ];
+
+    // ─── Elementary 公開ボタン（共通コンポーネント） ──────────
+    function ElementaryPublishButton({ compact }) {
+      const url = buildElementaryPublishUrl({
+        title: '量子もつれと情報理論',
+        genre: 'SF',
+        tags: ['量子力学', 'PhD', 'AI', '物理学'],
+        coverImageUrl: mangaPages[0].imageUrl,
+        authorName: doctorProfile.name,
+      });
+
+      if (compact) {
+        return (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.4rem 0.9rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#0f1419',
+              background: '#ffe03a',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              transition: 'opacity 0.15s',
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.opacity = '0.85'; }}
+            onMouseOut={(e) => { e.currentTarget.style.opacity = '1'; }}
+          >
+            ⚡ Elementary で公開
+          </a>
+        );
+      }
+
+      return (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            width: '100%',
+            maxWidth: '420px',
+            margin: '0 auto 1rem',
+            padding: '1rem 1.5rem',
+            fontSize: '1.05rem',
+            fontWeight: 700,
+            color: '#0f1419',
+            background: '#ffe03a',
+            border: 'none',
+            borderRadius: '1rem',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            boxShadow: '0 4px 20px rgba(255,224,58,0.35)',
+            transition: 'transform 0.15s, box-shadow 0.15s',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 6px 28px rgba(255,224,58,0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 20px rgba(255,224,58,0.35)';
+          }}
+        >
+          ⚡ Elementary で世界に公開する
+          <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>→</span>
+        </a>
+      );
+    }
+
+    function scrollToManga() {
+      document.getElementById('manga-viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function DoctorCanvas() {
+      const [currentPage, setCurrentPage] = useState(0);
+      const [viewMode, setViewMode] = useState('intro'); // 'intro' | 'fullscreen'
+
+      const nextPage = () => setCurrentPage((prev) => (prev < mangaPages.length - 1 ? prev + 1 : prev));
+      const prevPage = () => setCurrentPage((prev) => (prev > 0 ? prev - 1 : prev));
+
+      // 全画面漫画専用ビューワー
+      if (viewMode === 'fullscreen') {
+        return (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: '#0f1419', display: 'flex', flexDirection: 'column',
+            fontFamily: 'Inter, "Helvetica Neue", Arial, sans-serif'
+          }}>
+            <header style={{
+              flex: '0 0 auto', padding: '0.75rem 1rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(0,0,0,0.5)',
+              borderBottom: '1px solid rgba(255,255,255,0.08)'
+            }}>
+              <button
+                onClick={() => setViewMode('intro')}
+                style={{
+                  padding: '0.5rem 1rem', fontSize: '0.9rem', color: '#e8ecf4',
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '8px', cursor: 'pointer', fontWeight: 500
+                }}
+              >
+                ← 紹介に戻る
+              </button>
+
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+                {currentPage + 1} / {mangaPages.length}
+              </span>
+
+              {/* ① フルスクリーンヘッダーに Elementary 公開ボタン */}
+              <ElementaryPublishButton compact={true} />
+            </header>
+
+            <div style={{
+              flex: 1, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', padding: '1rem', minHeight: 0
+            }}>
+              <button
+                aria-label="前のページ" onClick={prevPage} disabled={currentPage === 0}
+                style={{
+                  flex: '0 0 auto', background: 'rgba(255,255,255,0.08)', border: 'none',
+                  color: '#fff', fontSize: '2.5rem', width: '56px', height: '56px',
+                  borderRadius: '50%',
+                  cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 0 ? 0.3 : 0.9, marginRight: '1rem'
+                }}
+              >‹</button>
+
+              <img
+                src={mangaPages[currentPage].imageUrl}
+                alt={`Page ${currentPage + 1}`}
+                style={{
+                  maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
+                  borderRadius: '4px', boxShadow: '0 8px 40px rgba(0,0,0,0.4)'
+                }}
+              />
+
+              <button
+                aria-label="次のページ" onClick={nextPage}
+                disabled={currentPage >= mangaPages.length - 1}
+                style={{
+                  flex: '0 0 auto', background: 'rgba(255,255,255,0.08)', border: 'none',
+                  color: '#fff', fontSize: '2.5rem', width: '56px', height: '56px',
+                  borderRadius: '50%',
+                  cursor: currentPage >= mangaPages.length - 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage >= mangaPages.length - 1 ? 0.3 : 0.9, marginLeft: '1rem'
+                }}
+              >›</button>
+            </div>
+          </div>
+        );
+      }
+
+      // 紹介ページ
+      return (
+        <div style={{
+          display: 'flex', flexDirection: 'column', minHeight: '100vh',
+          background: 'linear-gradient(180deg, #e6f0fa 0%, #c5d9ed 40%, #192841 100%)',
+          fontFamily: 'Inter, "Helvetica Neue", Arial, sans-serif'
+        }}>
+          <section style={{
+            padding: '3rem 2rem 2.5rem', maxWidth: '720px',
+            margin: '0 auto', width: '100%', boxSizing: 'border-box'
+          }}>
+            {/* ─── サービスヘッダー ─── */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: '1rem'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+                  <span style={{
+                    fontSize: '1.45rem', fontWeight: 900, color: '#ffe03a',
+                    letterSpacing: '0.04em'
+                  }}>
+                    Quantumy
+                  </span>
+                  <span style={{
+                    fontSize: '0.7rem', color: '#5a6c87', fontWeight: 500,
+                    padding: '0.1rem 0.5rem',
+                    border: '1px solid #b2bec3', borderRadius: '4px'
+                  }}>
+                    Phase 1
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#5a6c87', fontWeight: 500 }}>
+                  PhD研究のマンガ化コンセプト
+                </p>
+              </div>
+              <a href="https://elementary-anime.vercel.app/quantumy" target="_blank" rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.75rem', color: '#3f51b5',
+                  textDecoration: 'none', padding: '0.3rem 0.7rem',
+                  border: '1px solid #3f51b5', borderRadius: '6px'
+                }}>
+                Elementary との連携 →
+              </a>
+            </div>
+
+            <h1 style={{
+              fontSize: '1.75rem', color: '#192841', marginBottom: '1.5rem',
+              fontWeight: 700, letterSpacing: '0.02em'
+            }}>
+              博士号所持の漫画家 — 論文と漫画
+            </h1>
+
+            {/* プロフィール */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '1.5rem',
+              background: 'rgba(255,255,255,0.85)', borderRadius: '1rem',
+              padding: '1.5rem 1.75rem', marginBottom: '1.75rem',
+              boxShadow: '0 4px 20px rgba(25,40,65,0.08)',
+              border: '1px solid rgba(25,40,65,0.06)'
+            }}>
+              <div style={{
+                flexShrink: 0, width: '96px', height: '96px',
+                borderRadius: '50%', overflow: 'hidden',
+                border: '3px solid #253358', boxShadow: '0 4px 12px rgba(25,40,65,0.15)'
+              }}>
+                <img src={doctorProfile.avatarUrl} alt={doctorProfile.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <h2 style={{ fontSize: '1.1rem', color: '#253358', marginBottom: '0.5rem', fontWeight: 600 }}>
+                  プロフィール
+                </h2>
+                <p style={{ margin: 0, fontSize: '1rem', color: '#3d4f6b', lineHeight: 1.6 }}>
+                  <strong>{doctorProfile.name}</strong><br />
+                  {doctorProfile.degree}<br />
+                  研究分野: {doctorProfile.field}
+                </p>
+              </div>
+            </div>
+
+            <h2 style={{ fontSize: '1.15rem', color: '#253358', marginBottom: '1rem', fontWeight: 600 }}>
+              論文 Summary
+            </h2>
+
+            {references.map((ref) => (
+              <div key={ref.doi} style={{
+                background: 'rgba(255,255,255,0.9)', borderRadius: '0.75rem',
+                padding: '1rem 1.25rem', marginBottom: '1rem',
+                boxShadow: '0 2px 12px rgba(25,40,65,0.06)',
+                border: '1px solid rgba(25,40,65,0.05)'
+              }}>
+                <div style={{ fontWeight: 600, fontSize: '1rem', color: '#192841', marginBottom: '0.35rem' }}>
+                  {ref.title}
+                </div>
+                <div style={{ fontSize: '0.9rem', color: '#5a6c87', marginBottom: '0.5rem' }}>
+                  {ref.author}
+                </div>
+                <p style={{ fontSize: '0.95rem', color: '#3d4f6b', lineHeight: 1.6, margin: '0 0 0.75rem 0' }}>
+                  {ref.summary}
+                </p>
+                <a
+                  href={`https://doi.org/${ref.doi}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block', padding: '0.5rem 1rem',
+                    background: '#253358', color: '#e8ecf4',
+                    borderRadius: '8px', fontSize: '0.9rem',
+                    textDecoration: 'none', fontWeight: 500
+                  }}
+                >
+                  論文へ (DOI)
+                </a>
+              </div>
+            ))}
+
+            {/* ② 紹介ページのCTAエリアに Elementary 公開ボタン（メイン） */}
+            <div style={{
+              background: 'rgba(15,20,25,0.08)',
+              borderRadius: '1rem',
+              padding: '1.5rem',
+              marginBottom: '1.25rem',
+              border: '1.5px solid rgba(255,224,58,0.3)',
+            }}>
+              <p style={{
+                fontSize: '0.9rem', color: '#253358', marginBottom: '1rem',
+                fontWeight: 600, textAlign: 'center'
+              }}>
+                🎌 この作品を世界に配信する
+              </p>
+              <ElementaryPublishButton compact={false} />
+              <p style={{ fontSize: '0.78rem', color: '#5a6c87', textAlign: 'center', margin: '0.5rem 0 0' }}>
+                Elementary（日本発アニメプラットフォーム）で話数制限なし・11言語で公開
+              </p>
+            </div>
+
+            {/* 漫画本編を全画面で読む */}
+            <button
+              onClick={() => setViewMode('fullscreen')}
+              style={{
+                display: 'block', width: '100%', maxWidth: '420px',
+                margin: '0 auto 1.25rem',
+                padding: '1.1rem 1.5rem', fontSize: '1.15rem', fontWeight: 700,
+                color: '#fff',
+                background: 'linear-gradient(135deg, #192841 0%, #253358 50%, #3f51b5 100%)',
+                border: 'none', borderRadius: '1rem', cursor: 'pointer',
+                boxShadow: '0 6px 24px rgba(25,40,65,0.35)',
+                transition: 'transform 0.15s, box-shadow 0.15s'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(25,40,65,0.45)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(25,40,65,0.35)'; }}
+            >
+              漫画本編を全画面で読む
+            </button>
+
+            <button
+              onClick={scrollToManga}
+              style={{
+                display: 'block', width: '100%', maxWidth: '360px', margin: '0 auto',
+                padding: '0.9rem 1.25rem', fontSize: '1rem', fontWeight: 600,
+                color: '#3f51b5', background: 'rgba(255,255,255,0.9)',
+                border: '2px solid #3f51b5', borderRadius: '1rem', cursor: 'pointer',
+                transition: 'transform 0.15s'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.01)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              漫画本編へ進む（スクロール） →
+            </button>
+          </section>
+
+          {/* 漫画ビューワー（同一ページ内） */}
+          <section id="manga-viewer" style={{
+            display: 'flex', flex: 1, minHeight: '100vh', alignItems: 'stretch'
+          }}>
+            <div style={{
+              flex: 1, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', padding: '2rem',
+            }}>
+              <button
+                aria-label="前のページ" onClick={prevPage} disabled={currentPage === 0}
+                style={{
+                  background: 'none', border: 'none', color: '#3f51b5', fontSize: '2rem',
+                  cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 0 ? 0.3 : 1, marginRight: '1.5rem'
+                }}
+              >‹</button>
+
+              <img
+                src={mangaPages[currentPage].imageUrl}
+                alt={`Manga Page ${currentPage + 1}`}
+                style={{
+                  boxShadow: '0 6px 32px 0 rgba(25,40,65,.23)',
+                  borderRadius: '1rem', border: '2px solid #b2bec3',
+                  maxWidth: '420px', width: '100%', height: 'auto',
+                  background: '#fff', transition: 'box-shadow 0.2s'
+                }}
+              />
+
+              <button
+                aria-label="次のページ" onClick={nextPage}
+                disabled={currentPage >= mangaPages.length - 1}
+                style={{
+                  background: 'none', border: 'none', color: '#3f51b5', fontSize: '2rem',
+                  cursor: currentPage >= mangaPages.length - 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage >= mangaPages.length - 1 ? 0.3 : 1, marginLeft: '1.5rem'
+                }}
+              >›</button>
+            </div>
+
+            <aside style={{
+              width: '340px', background: '#253358EF', color: '#f2f6fa',
+              padding: '2.5rem 2rem',
+              boxShadow: '-1px 0 8px 0 rgba(25,40,65,.04)',
+              display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
+              borderTopLeftRadius: '1.5rem', borderBottomLeftRadius: '1.5rem'
+            }}>
+              <h2 style={{
+                fontSize: '1.3rem', letterSpacing: '0.04em', marginBottom: '1.2rem',
+                fontWeight: 700, color: '#ffe03a'
+              }}>
+                📚 論文出典 (References)
+              </h2>
+
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {references.map((ref, i) => (
+                  <li key={ref.doi} style={{
+                    marginBottom: '1.3rem',
+                    background: i % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.10)',
+                    borderRadius: '10px', padding: '0.8rem 1rem', transition: 'background 0.2s',
+                  }}>
+                    <div style={{ fontWeight: 600, fontSize: '1.05rem', marginBottom: '0.1em', color: '#dbeafe' }}>
+                      {ref.title}
+                    </div>
+                    <div style={{ fontSize: '0.96rem', color: '#d2ceee', marginBottom: '0.2em' }}>
+                      <span style={{ fontWeight: 450 }}>{ref.author}</span>
+                    </div>
+                    <div style={{ fontSize: '0.91rem' }}>
+                      <a href={`https://doi.org/${ref.doi}`} target="_blank" rel="noopener noreferrer"
+                        style={{ color: '#91d6fe', textDecoration: 'underline dotted' }}>
+                        DOI: {ref.doi}
+                      </a>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {/* ③ サイドバーフッターに Elementary リンク */}
+              <footer style={{ marginTop: 'auto', paddingTop: '1.3rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <ElementaryPublishButton compact={true} />
+                <p style={{ fontSize: '11px', color: '#b2bec3', marginTop: '0.75rem' }}>
+                  <span style={{ color: '#ffe03a', fontWeight: 700 }}>Quantumy</span>
+                  <span style={{ color: '#b2bec3' }}> — PhD研究のマンガ化コンセプト</span>
+                  <br />
+                  <a href={`${ELEMENTARY_URL}/quantumy`} target="_blank" rel="noopener noreferrer"
+                    style={{ color: '#91d6fe', textDecoration: 'none' }}>
+                    Elementary との連携を見る →
+                  </a>
+                </p>
+              </footer>
+            </aside>
+          </section>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<DoctorCanvas />);
+  </script>
+</body>
+</html>

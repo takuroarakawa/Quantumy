@@ -1,0 +1,61 @@
+groups:
+  - name: error_rate
+    interval: 30s
+    rules:
+      # 5xxエラー率が1%超で2分継続
+      - alert: HighErrorRate5xx
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) > 0.01
+        for: 2m
+        labels:
+          severity: warning
+          action: notify
+        annotations:
+          summary: "5xxエラー率が高い ({{ $labels.job }})"
+          description: "エラー率 {{ $value | humanizePercentage }} — 閾値1%超"
+
+      # 5xxエラー率が5%超 → Critical
+      - alert: CriticalErrorRate5xx
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+          action: restart_and_failover
+        annotations:
+          summary: "5xxエラー率が危機的 ({{ $labels.job }})"
+          description: "エラー率 {{ $value | humanizePercentage }} — 自動フェイルオーバーを実行"
+
+      # 4xxエラー率が10%超（攻撃の可能性）
+      - alert: High4xxRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"4.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) > 0.10
+        for: 3m
+        labels:
+          severity: warning
+          action: notify_security
+        annotations:
+          summary: "4xxエラー率異常 ({{ $labels.job }}) — DoS攻撃の可能性"
+
+      # DBコネクションエラー
+      - alert: DatabaseConnectionError
+        expr: pg_up == 0
+        for: 30s
+        labels:
+          severity: critical
+          action: failover_db
+        annotations:
+          summary: "PostgreSQL 接続断"
+          description: "データベースへの接続が失われました。バックアップDBへの切り替えを実行。"

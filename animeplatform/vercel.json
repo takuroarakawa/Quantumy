@@ -1,0 +1,22 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "bash scripts/use-postgres.sh && prisma generate && next build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "headers": [
+    {
+      "source": "/api/metrics",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/api/webhook/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/q",
+      "destination": "/quantumy"
+    }
+  ]
+}

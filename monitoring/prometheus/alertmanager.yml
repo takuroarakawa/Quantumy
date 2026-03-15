@@ -1,0 +1,54 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ["alertname", "job", "severity"]
+  group_wait:      30s
+  group_interval:  5m
+  repeat_interval: 4h
+  receiver: "rust-alert-handler"
+
+  routes:
+    # Critical → Rust ハンドラー + Slack
+    - matchers:
+        - severity="critical"
+      receiver: "rust-alert-handler"
+      continue: true
+
+    # セキュリティアラート
+    - matchers:
+        - action="notify_security"
+      receiver: "security-team"
+
+    # 経営陣通知
+    - matchers:
+        - action="notify_management"
+      receiver: "management"
+
+receivers:
+  # ─── Rust アラートハンドラー（自動アクション実行） ────
+  - name: "rust-alert-handler"
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
+        send_resolved: true
+
+  # ─── Slack 通知 ─────────────────────────────────────
+  # SLACK_WEBHOOK_URL を設定した場合は slack_configs を有効化してください
+  - name: "slack-ops"
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
+        send_resolved: true
+
+  - name: "security-team"
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
+
+  - name: "management"
+    webhook_configs:
+      - url: "http://host.docker.internal:8090/webhook"
+
+inhibit_rules:
+  # Critical が発火中は Warning を抑制
+  - source_matchers: [severity="critical"]
+    target_matchers: [severity="warning"]
+    equal: ["job", "instance"]

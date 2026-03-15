@@ -1,0 +1,42 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: production
+    service: elementary
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["172.18.0.2:9093"]
+
+rule_files:
+  - "rules/response_time.yml"
+  - "rules/error_rate.yml"
+  - "rules/availability.yml"
+  - "rules/resource.yml"
+
+scrape_configs:
+  # ─── Prometheus 自身 ────────────────────────────────
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ─── Node Exporter (OS メトリクス) ──────────────────
+  # hostネットワークで起動中 (port 9101)
+  - job_name: "node"
+    static_configs:
+      - targets: ["172.18.0.1:9101"]
+
+  # ─── Elementary Next.js アプリ ──────────────────────
+  - job_name: "elementary-app"
+    static_configs:
+      - targets: ["172.18.0.1:3000"]
+    metrics_path: /api/metrics
+
+  # ─── Manga-Math Rust API ───────────────────────────
+  # /metrics エンドポイント公開後に有効化
+  - job_name: "manga-math-api"
+    static_configs:
+      - targets: ["172.18.0.1:8080"]
+    metrics_path: /metrics
